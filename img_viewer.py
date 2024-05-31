@@ -50,6 +50,17 @@ class ImageViewer(QWidget):
         self.viewer_labels = ZoomableGraphicsView(self)
         self.layout.addWidget(self.viewer_labels)
 
+        self.legend_layout = QVBoxLayout()
+        self.layout.addLayout(self.legend_layout)
+
+        self.dsm_label = QLabel("DSM")
+        self.dsm_label.setStyleSheet("QLabel { color : blue; }")
+        self.legend_layout.addWidget(self.dsm_label)
+
+        self.lsm_label = QLabel("LSM")
+        self.lsm_label.setStyleSheet("QLabel { color : red; }")
+        self.legend_layout.addWidget(self.lsm_label)
+
         self.viewer_predictions_label = QLabel("Inference Prediction from Current Model:")
         self.layout.addWidget(self.viewer_predictions_label)
         self.viewer_predictions = ZoomableGraphicsView(self)
@@ -68,6 +79,7 @@ class ImageViewer(QWidget):
             self.labels_dir = selected_dir
             display_text = "Selected Labels Directory: " + selected_dir
             self.labels_dir_label.setText(display_text)
+
 
     def select_predictions_dir(self):
         selected_dir = QFileDialog.getExistingDirectory(self, 'Select Predictions Images Directory')
@@ -96,22 +108,29 @@ class ImageViewer(QWidget):
             self.display_image(os.path.join(self.predictions_dir, image_name), self.viewer_predictions)
 
     def display_image(self, image_path, viewer, is_label=False):
-        
         pixmap = QPixmap(image_path)
-        
+
         if is_label:
             painter = QPainter(pixmap)
             pen = QPen()
             pen.setWidth(3)
-            pen.setColor(QColor(255, 0, 0))
-            painter.setPen(pen)
 
             base = os.path.splitext(image_path)[0]
             labels_path = f"{base}.txt"
 
             with open(labels_path, 'r') as f:
                 for line in f:
-                    _, x_center, y_center, width, height = map(float, line.split())
+                    class_id, x_center, y_center, width, height = map(float, line.split())
+
+                    # Set pen color based on class_id
+                    if class_id == 0:
+                        pen.setColor(QColor(0, 0, 255))  # Blue
+                    elif class_id == 1:
+                        pen.setColor(QColor(255, 0, 0))  # Red
+                    # Add more colors for other class_ids if needed
+
+                    painter.setPen(pen)
+
                     x_center *= pixmap.width()
                     y_center *= pixmap.height()
                     width *= pixmap.width()
