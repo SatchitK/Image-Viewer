@@ -123,11 +123,14 @@ class ImageViewer(QWidget):
                     class_id, x_center, y_center, width, height = map(float, line.split())
 
                     # Set pen color based on class_id
+                    # dsm = 0, lsm = 1, other = 2
                     if class_id == 0:
                         pen.setColor(QColor(0, 0, 255))  # Blue
                     elif class_id == 1:
                         pen.setColor(QColor(255, 0, 0))  # Red
-                    # Add more colors for other class_ids if needed
+                    else:
+                        pen.setColor(QColor(0, 255, 0))  # Green
+                    
 
                     painter.setPen(pen)
 
