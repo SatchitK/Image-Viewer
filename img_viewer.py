@@ -96,9 +96,9 @@ class ImageViewer(QWidget):
         if not os.path.exists(os.path.join(self.raw_dir, temp_name)):
             QMessageBox.warning(self, 'Error', 'Image not found in Raw Image folder')
             return
-        elif not os.path.exists(os.path.join(self.labels_dir, temp_label)):
-            QMessageBox.warning(self, 'Error', 'Image label not found in Labels folder')
-            return
+        # elif not os.path.exists(os.path.join(self.labels_dir, temp_label)):
+        #     QMessageBox.warning(self, 'Error', 'Image label not found in Labels folder')
+        #     return
         elif not os.path.exists(os.path.join(self.predictions_dir, temp_name)):
             QMessageBox.warning(self, 'Error', 'Image not found in Predictions folder')
             return
@@ -111,41 +111,41 @@ class ImageViewer(QWidget):
         pixmap = QPixmap(image_path)
 
         if is_label:
-            painter = QPainter(pixmap)
-            pen = QPen()
-            pen.setWidth(3)
-
             base = os.path.splitext(image_path)[0]
             labels_path = f"{base}.txt"
 
-            with open(labels_path, 'r') as f:
-                for line in f:
-                    class_id, x_center, y_center, width, height = map(float, line.split())
+            if os.path.exists(labels_path):
+                painter = QPainter(pixmap)
+                pen = QPen()
+                pen.setWidth(3)
 
-                    # Set pen color based on class_id
-                    # dsm = 0, lsm = 1, other = 2
-                    if class_id == 0:
-                        pen.setColor(QColor(0, 0, 255))  # Blue
-                    elif class_id == 1:
-                        pen.setColor(QColor(255, 0, 0))  # Red
-                    else:
-                        pen.setColor(QColor(0, 255, 0))  # Green
-                    
+                with open(labels_path, 'r') as f:
+                    for line in f:
+                        class_id, x_center, y_center, width, height = map(float, line.split())
 
-                    painter.setPen(pen)
+                        # Set pen color based on class_id
+                        if class_id == 0:
+                            pen.setColor(QColor(0, 0, 255))  # Blue
+                        elif class_id == 1:
+                            pen.setColor(QColor(255, 0, 0))  # Red
+                        else:
+                            pen.setColor(QColor(0, 255, 0))  # Green
 
-                    x_center *= pixmap.width()
-                    y_center *= pixmap.height()
-                    width *= pixmap.width()
-                    height *= pixmap.height()
-                    x_top_left = round(x_center - width / 2)
-                    y_top_left = round(y_center - height / 2)
-                    width = round(width)
-                    height = round(height)
+                        painter.setPen(pen)
 
-                    painter.drawRect(x_top_left, y_top_left, width, height)
+                        x_center *= pixmap.width()
+                        y_center *= pixmap.height()
+                        width *= pixmap.width()
+                        height *= pixmap.height()
+                        x_top_left = round(x_center - width / 2)
+                        y_top_left = round(y_center - height / 2)
+                        width = round(width)
+                        height = round(height)
 
-            painter.end()
+                        painter.drawRect(x_top_left, y_top_left, width, height)
+
+                painter.end()
+            
 
         scene = QGraphicsScene()
         item = QGraphicsPixmapItem(pixmap)
